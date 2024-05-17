@@ -1,6 +1,9 @@
 const express = require('express')
 // const {faker} = require('@faker-js/faker')
 const ProductsService = require('./../services/productService')
+const validatorHandler = require('./../middleware/validatorHandler')
+const {createProductSchema, updateProductSchema, getProductSchema} = require('./../schemas/productSchema')
+
 
 const router = express.Router();
 const service = new ProductsService();
@@ -25,10 +28,17 @@ router.get('/filter', (req, res)=>{
   res.send('Soy un filter');
 })
 
-router.get('/:id', async (req,res) =>{
-  const id= req.params.id // const {id}=req.params // y se devuelve en el res.json
-  const product = await service.findOne(id)
-  res.json(product)
+router.get('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  async (req,res, next) =>{
+    try {
+      const id= req.params.id // const {id}=req.params // y se devuelve en el res.json
+      const product = await service.findOne(id)
+      res.json(product)
+    } catch (error) {
+      next(error);
+    }
+
   // if(id == '999'){
   //   res.status(404).json({
   //     message: 'Not Found'
@@ -43,14 +53,16 @@ router.get('/:id', async (req,res) =>{
 
 })
 
-router.post('/', async (req,res) =>{
-  const body = req.body;
-  const newProduct = await service.create(body);
-  res.status(201).json(newProduct)
-  // res.status(201).json({
-  //   message: 'created',
-  //   data: body
-  // })
+router.post('/',
+  validatorHandler(createProductSchema, 'body'),
+  async (req,res) =>{
+    const body = req.body;
+    const newProduct = await service.create(body);
+    res.status(201).json(newProduct)
+    // res.status(201).json({
+    //   message: 'created',
+    //   data: body
+    // })
 })
 
 router.put('/:id', (req,res) =>{
@@ -63,24 +75,28 @@ router.put('/:id', (req,res) =>{
   })
 })
 
-router.patch('/:id', async (req,res) =>{
-  try {
-    const {id} = req.params;
-    const body = req.body;
-    const product = await service.update(id, body)
-    res.json(product)
-  } catch (error) {
-    res.status(404).json({
-      message:error.message
-    })
+router.patch('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  validatorHandler(updateProductSchema, 'body'),
+  async (req,res,next) =>{
+    try {
+      const {id} = req.params;
+      const body = req.body;
+      const product = await service.update(id, body)
+      res.json(product)
+    } catch (error) {
+      next(error);
+      // res.status(404).json({
+      //   message:error.message
+      // })
 
-  }
+    }
 
-  // res.json({
-  //   message: 'updated partial',
-  //   data: body,
-  //   id
-  // })
+    // res.json({
+    //   message: 'updated partial',
+    //   data: body,
+    //   id
+    // })
 })
 
 router.delete('/:id',async (req,res) =>{
