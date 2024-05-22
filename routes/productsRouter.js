@@ -19,8 +19,12 @@ router.get('/', async (req,res)=>{
 //       image: faker.image.imageUrl()
 //     })
 // }
-const products = await service.find();
-res.json(products)
+try {
+  const products = await service.find();
+  res.json(products);
+} catch (error) {
+  next(error);
+}
 })
 
 
@@ -56,9 +60,13 @@ router.get('/:id',
 router.post('/',
   validatorHandler(createProductSchema, 'body'),
   async (req,res) =>{
-    const body = req.body;
-    const newProduct = await service.create(body);
-    res.status(201).json(newProduct)
+    try {
+      const body = req.body;
+      const newProduct = await service.create(body);
+      res.status(201).json(newProduct);
+    } catch (error) {
+      next(error);
+    }
     // res.status(201).json({
     //   message: 'created',
     //   data: body
@@ -99,10 +107,16 @@ router.patch('/:id',
     // })
 })
 
-router.delete('/:id',async (req,res) =>{
-  const {id} = req.params;
-  const rta = await service.delete(id)
-  res.json(rta)
+router.delete('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  async (req,res) =>{
+    try {
+      const { id } = req.params;
+      await service.delete(id);
+      res.status(201).json({id});
+    } catch (error) {
+      next(error);
+    }
   // res.json({
   //   message: 'deleted',
   //   id
