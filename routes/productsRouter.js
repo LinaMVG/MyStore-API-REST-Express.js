@@ -8,7 +8,7 @@ const {createProductSchema, updateProductSchema, getProductSchema} = require('./
 const router = express.Router();
 const service = new ProductsService();
 
-router.get('/', async (req,res)=>{
+router.get('/', async (req,res, next)=>{
 //   const products = [];
 //   const {size} = req.query
 //   const limit = size || 10
