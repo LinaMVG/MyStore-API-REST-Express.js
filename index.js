@@ -1,6 +1,6 @@
 const express = require('express')
 const routerApi = require('./routes')
-const {logErrors, errorHandler, boomErrorHandler} = require('./middleware/errorHandler')
+const {logErrors, errorHandler, boomErrorHandler, ormErrorHandler} = require('./middleware/errorHandler')
 // const {faker} = require('@faker-js/faker')
 // const { name } = require('faker/lib/locales/az')
 // const { product_name } = require('faker/lib/locales/az/commerce')
@@ -21,9 +21,9 @@ app.get('/nueva-ruta', (req,res)=>{
 routerApi(app);
 
 app.use(logErrors)
+app.use(ormErrorHandler)
 app.use(boomErrorHandler)
 app.use(errorHandler)
-
 
 // app.get('/products', (req,res)=>{
 //   const products = [];
