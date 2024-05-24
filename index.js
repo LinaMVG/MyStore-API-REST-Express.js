@@ -1,22 +1,38 @@
 const express = require('express')
 const routerApi = require('./routes')
+const cors = require('cors');
+const { checkApiKey } = require('./middleware/authHandler');
+
+
 const {logErrors, errorHandler, boomErrorHandler, ormErrorHandler} = require('./middleware/errorHandler')
 // const {faker} = require('@faker-js/faker')
 // const { name } = require('faker/lib/locales/az')
 // const { product_name } = require('faker/lib/locales/az/commerce')
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000;
 
 app.use(express.json())
+
+const whitelist = ['http://localhost:8080', 'https://myapp.co'];
+const options = {
+  origin: (origin, callback) => {
+    if (whitelist.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('no permitido'));
+    }
+  }
+}
+app.use(cors(options));
 
 app.get('/', (req,res)=>{
   res.send('Hola, mi server en express')
 })
 
-app.get('/nueva-ruta', (req,res)=>{
-  res.send('Hola, soy el nuevo endpoint')
-})
+app.get('/nueva-ruta', checkApiKey, (req, res) => {
+  res.send('Hola, soy el nuevo endpoint');
+});
 
 routerApi(app);
 
