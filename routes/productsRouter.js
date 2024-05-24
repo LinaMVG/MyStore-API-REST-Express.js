@@ -2,13 +2,15 @@ const express = require('express')
 // const {faker} = require('@faker-js/faker')
 const ProductsService = require('./../services/productService')
 const validatorHandler = require('./../middleware/validatorHandler')
-const {createProductSchema, updateProductSchema, getProductSchema} = require('./../schemas/productSchema')
+const {createProductSchema, updateProductSchema, getProductSchema, queryProductSchema} = require('./../schemas/productSchema')
 
 
 const router = express.Router();
 const service = new ProductsService();
 
-router.get('/', async (req,res, next)=>{
+router.get('/',
+validatorHandler(queryProductSchema, 'query'),
+async (req,res, next)=>{
 //   const products = [];
 //   const {size} = req.query
 //   const limit = size || 10
@@ -19,12 +21,12 @@ router.get('/', async (req,res, next)=>{
 //       image: faker.image.imageUrl()
 //     })
 // }
-try {
-  const products = await service.find();
-  res.json(products);
-} catch (error) {
-  next(error);
-}
+  try {
+    const products = await service.find(req.query);
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
 })
 
 
