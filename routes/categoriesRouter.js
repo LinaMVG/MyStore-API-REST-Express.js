@@ -4,6 +4,7 @@ const {faker} = require('@faker-js/faker')
 
 const CategoryService = require('./../services/categoryService')
 const validatorHandler = require('./../middleware/validatorHandler')
+const { checkRoles } = require('./../middleware/authHandler');
 const { createCategorySchema, updateCategorySchema, getCategorySchema } = require('./../schemas/categorySchema')
 
 const router = express.Router();
@@ -19,7 +20,9 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get('/:id',
+  passport.authenticate('jwt', {session: false}),
   validatorHandler(getCategorySchema, 'params'),
+  checkRoles('admin', 'customer'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -33,6 +36,7 @@ router.get('/:id',
 
 router.post('/',
   passport.authenticate('jwt', {session: false}),
+  checkRoles('admin', 'seller', 'customer'),
   validatorHandler(createCategorySchema, 'body'),
   async (req, res, next) => {
     try {
